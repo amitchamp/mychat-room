@@ -7,7 +7,8 @@ A simple chat demo using node-js and socket.io
 Create database on mongolab or local and insert into config/secret.js in `database` key.
 Change port number (optionally)
 Change secretKey
-Create facebook app (https://developers.facebook.com/apps/) and copy app_id and app_secret and paste into `app_id` and `app_secret` key respectively.
+Create facebook app (https://developers.facebook.com/apps/) and copy app_id and app_secret 
+and paste into `app_id` and `app_secret` key respectively.
 Change host (optionally)
 ```
 
