@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+      <meta name="description" content="" />
+      <meta name="author" content="" />
+      <!--[if IE]>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+          <![endif]-->
+      <title>Welcome to {{ room_name }} | My Chatroom</title>
+      <!-- BOOTSTRAP CORE STYLE CSS -->
+      <link href="/css/bootstrap.css" rel="stylesheet" />
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+
+        <script type="text/javascript">
+            $(function() {
+                var host = '{{ host }}';
+                var messages = io.connect(host + '/messages');
+                var roomNumber = '{{ room_number }}';
+                var userName = '{{ user.full_name }}';
+                var userPic = '{{ user.profile_pic }}';
+
+                messages.on('connect', function() {
+                  console.log("Connection Established");
+                  messages.emit('joinroom', {
+                    room: roomNumber,
+                    user: userName,
+                    userPic: userPic
+                  });
+                });
+
+
+                $(document).on('keyup', '.chat-input', function(e) {
+                  if (e.which === 13 && $(this).val != '') {
+                    messages.emit('newMessage', {
+                      roomNumber: roomNumber,
+                      user: userName,
+                      userPic: userPic,
+                      message: $(this).val()
+                    });
+
+                    updateMessageFeed(userName, userPic, $(this).val());
+                    $(this).val('');
+                  }
+                });
+
+                messages.on('messageFeed', function(data) {
+                  var returnMsg = JSON.parse(data);
+                  updateMessageFeed(returnMsg.user, returnMsg.userPic, returnMsg.message);
+                });
+
+                function updateMessageFeed(userName, userPic, message) {
+                  var newMsgString = '<li class="media">';
+                      newMsgString += '<div class="media-body">'
+                      newMsgString += '<div class="media">';
+                      newMsgString += '<a class="pull-left" href="#">';
+                      newMsgString += '<img class="media-object img-circle " src="' + userPic + '" height="64" width="64" />';
+                      newMsgString += '</a>';
+                      newMsgString += '<div class="media-body" >';
+                      newMsgString += message;
+                      newMsgString += '<br />';
+                      newMsgString += '<small class="text-muted">' + userName + '<small>';// ' | 23rd June at 5:00pm</small>';
+                      newMsgString += '<hr />';
+                      newMsgString += '</div>';
+                      newMsgString += '</div>';
+                      newMsgString += '</div>';
+                      newMsgString += '</li> ';
+                      $(newMsgString).hide().prependTo($('.user-chats')).slideDown(100);
+                }
+
+                messages.on('updateUserList', function(data) {
+                  var users = JSON.parse(data);
+
+                  $('.online-users').html('');
+
+                  for (var i = 0; i < users.length; i++) {
+                    var onlineUserString = '<li class="media">';
+                        onlineUserString += '<div class="media-body">';
+                        onlineUserString += '<div class="media">';
+                        onlineUserString += '<a class="pull-left" href="#">';
+                        onlineUserString += '<img class="media-object img-circle" style="max-height:40px;" src="' + users[i].userPic + '" />';
+                        onlineUserString += '</a>';
+                        onlineUserString += '<div class="media-body" >';
+                        onlineUserString += '<h5>' + users[i].userName + '</h5>';
+                        //onlineUserString += '<small class="text-muted">Active From 3 hours</small>';
+                        onlineUserString += '</div>';
+                        onlineUserString += '</div>';
+                        onlineUserString += '</div>';
+                        onlineUserString += '</li>';
+
+                        $(onlineUserString).prependTo($('.online-users'));
+                  }
+
+                });
+
+                setInterval(function() {
+                  messages.emit('updateList', { room: roomNumber });
+                }, 15 * 1000);
+
+            })
+        </script>
+
+  </head>
+  <body style="font-family:Verdana">
+    <div class="container">
+      <div class="row " style="padding-top:40px;">
+        <h3 class="text-center" >Welcome to {{ room_name }} </h3>
+        <br /><br />
+        <div class="col-md-8">
+          <div class="panel panel-info">
+            <div class="panel-heading">RECENT CHAT HISTORY <span style="float: right;"><a href="/chatrooms">More rooms</a></span></div>
+            <div class="panel-body">
+              <ul class="media-list user-chats">
+              </ul>
+            </div>
+            <div class="panel-footer">
+              <div class="input-group">
+                <input type="text" class="form-control chat-input" placeholder="Enter Message" />
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="button">SEND</button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="panel panel-primary">
+            <div class="panel-heading">ONLINE USERS</div>
+            <div class="panel-body">
+              <ul class="media-list online-users">
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ user.full_name }} | My Chatroom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script type="text/javascript">
+      $(function() {
+        var host = '{{ host }}';
+        var socket = io.connect(host + '/roomlist');
+
+        socket.on('connect', function() {
+          console.log('Connection Established');
+        });
+
+        socket.on('roomupdate', function(data) {
+          var roomData = JSON.parse(data);
+          $('.media-block').html('');
+
+          for (var i = 0; i < roomData.length; i++) {
+            var str = '<li class="mar-btm"><div class="media-body pad-hor"><a href="/room/' + roomData[i].room_number + '" class="media-heading">' + roomData[i].room_name + '</a></div></li>';
+
+            $('.media-block').prepend(str);
+          }
+        });
+
+        $(document).on('click', '#room-create', function() {
+          var room_name = $('.roomname-input').val();
+          if (room_name != '') {
+            var room_number = room_name.toLowerCase() + '_' + parseInt(Math.random() * 10000);
+            socket.emit('newroom', {
+              room_name: room_name,
+              room_number: room_number
+            });
+            $('.roomname-input').val('');
+          }
+        })
+      });
+    </script>
+
+  </head>
+<body>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<div class="container">
+  <div class="col-md-12 col-lg-6">
+    <div class="panel">
+        
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <img src="{{ user.profile_pic }}" class="img-circle img-sm" alt="Profile Picture">
+          <span>{{ user.full_name }}</span> | 
+          <span><a href="/logout">Logout</a></span>
+        </h3>
+      </div>
+  
+      <!--Widget body-->
+      <div id="demo-chat-body" class="collapse in">
+        <div class="nano has-scrollbar" style="height:380px">
+          <div class="nano-content pad-all" tabindex="0" style="right: -17px;">
+            <ul class="list-unstyled media-block">
+            </ul>
+          </div>
+        <div class="nano-pane"><div class="nano-slider" style="height: 141px; transform: translate(0px, 0px);"></div></div></div>
+  
+        <!--Widget footer-->
+        <div class="panel-footer">
+          <div class="row">
+            <div class="col-xs-9">
+              <input type="text" placeholder="Enter new room name" class="form-control roomname-input">
+            </div>
+            <div class="col-xs-3">
+              <button class="btn btn-primary btn-block" type="submit" id="room-create">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  
+</script>
+</body>
+</html>
