@@ -26,7 +26,7 @@ And point your browser to `http://localhost:3000`.
 
 ## Features
 
-cLoggedin by facebook.
+Loggedin by facebook.
 - Multiple users can join a chat room by each using facebook login.
 - Users can type chat messages to the chat room.
 - Users can create own rooms.
